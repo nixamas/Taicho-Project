@@ -7,7 +7,7 @@ import com.cosmichorizons.basecomponents.Coordinate;
 import com.cosmichorizons.basecomponents.MovableObject;
 import com.cosmichorizons.characters.EmptyObject;
 import com.cosmichorizons.characters.OneUnit;
-import com.cosmichorizons.characters.Taicho;
+import com.cosmichorizons.characters.TaichoUnit;
 import com.cosmichorizons.characters.ThreeUnit;
 import com.cosmichorizons.characters.TwoUnit;
 import com.cosmichorizons.enums.Location;
@@ -69,10 +69,10 @@ public class TaichoGameData {
 			for (int row = 0; row < 9; row++) {
 				if (row == 4 && col == 1) {
 					// position is Player One Taicho
-					board[row][col] = new BoardComponent(new Taicho(player1), Location.PLAYER_ONE_CASTLE, new Coordinate(col, row, index));
+					board[row][col] = new BoardComponent(new TaichoUnit(player1), Location.PLAYER_ONE_CASTLE, new Coordinate(col, row, index));
 				} else if (row == 4 && col == 13) {
 					// position is Player Two Taicho
-					board[row][col] = new BoardComponent(new Taicho(player2), Location.PLAYER_TWO_CASTLE, new Coordinate(col, row, index));
+					board[row][col] = new BoardComponent(new TaichoUnit(player2), Location.PLAYER_TWO_CASTLE, new Coordinate(col, row, index));
 				} else if (((col == 10) && (row % 2 == 0))
 						|| ((col == 9 || col == 11) && (row % 2 == 1))) {
 					// position is Player Two Samurai

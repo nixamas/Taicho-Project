@@ -320,7 +320,8 @@ public class StateGame extends State {
 		if( _state == State.MovingCharacter 
 //				){
 				|| _state == State.AttackingOpponentCharacter
-				|| _state == State.StackingCharacter){
+				|| _state == State.StackingCharacter
+				|| _state == State.UnStackingCharacter){
 //			System.out.println("updating the moving characters ");
 			
 			
@@ -348,6 +349,10 @@ public class StateGame extends State {
 							}else if( _state == State.StackingCharacter){
 								System.err.println("Sending StackMove to TaichoGameData... ::: " + _destinationBC.toString());
 								_myTaichoBoard.stackUnits(_destinationBC.getCoordinate());
+								eraseValidMoves();
+							}else if( _state == State.UnStackingCharacter){
+								System.err.println("Sending UnStackMove to TaichoGameData... ::: " + _destinationBC.toString());
+								_myTaichoBoard.unstackUnits(_destinationBC.getCoordinate());
 								eraseValidMoves();
 							}
 							
@@ -483,7 +488,7 @@ public class StateGame extends State {
 	            	
 	                
 	             // Now, if img is not NULL (there's something to draw)
-	                if (img != null) {									//TODO: EDIT CODE HERE FOR PLACEMENT OF OBJECTS ON SCREEN
+	                if (img != null || _state == State.UnStackingCharacter) {									//TODO: EDIT CODE HERE FOR PLACEMENT OF OBJECTS ON SCREEN
 	                    // Default positions
 	                    float imgX = gemsInitial.x + i * SCREEN_SPACER;
 	                    float imgY = gemsInitial.y + j * SCREEN_SPACER;	                   
@@ -491,6 +496,47 @@ public class StateGame extends State {
 	                    
 	                    
 	                    if( _destinationBC != null && _selectedBC != null){	
+	                    	if(_state == State.UnStackingCharacter){	                    		
+	                    		if(img != null &&
+	                    				 (i != _selectedBC.getCoordinate().getPosX() && j != _selectedBC.getCoordinate().getPosY()) ){
+	                    			System.out.println("currently drawing at position of the EVERY OTHER object");
+	                    			batch.setColor(colorTint);
+	    		                    batch.draw(img, imgX, imgY);
+	    		                    batch.setColor(_imgColor);
+	                    		}else if( i == _selectedBC.getCoordinate().getPosX() && j == _selectedBC.getCoordinate().getPosY() ){
+	                    			System.out.println("currently drawing at position of the selected object");
+	                    			batch.setColor(colorTint);
+	    		                    batch.draw(img, imgX, imgY);
+	    		                    batch.setColor(_imgColor);
+	                    			if(i == _selectedBC.getCoordinate().getPosX() &&  j == _selectedBC.getCoordinate().getPosY() ) {
+			                            imgX = Animation.easeOutQuad(_animTime,
+			                            							 gemsInitial.x + i * SCREEN_SPACER,
+			                            		                     (_destinationBC.getCoordinate().getPosX() - _selectedBC.getCoordinate().getPosX()) * SCREEN_SPACER,
+			                            		                     _animTotalTime);
+			                            imgY = Animation.easeOutQuad(_animTime,
+			                            							 gemsInitial.y + j * SCREEN_SPACER,
+			                            							 (_destinationBC.getCoordinate().getPosY() - _selectedBC.getCoordinate().getPosY()) * SCREEN_SPACER,
+			                            							 _animTotalTime);
+			                        }
+			                        else if (i == _selectedBC.getCoordinate().getPosX() && j == _selectedBC.getCoordinate().getPosY() ){
+			                            imgX = Animation.easeOutQuad(_animTime,
+			                            							 gemsInitial.x + i * SCREEN_SPACER,
+			                            							 (_selectedBC.getCoordinate().getPosX() - _destinationBC.getCoordinate().getPosX()) * SCREEN_SPACER,
+			                            							 _animTotalTime);
+			                            imgY = Animation.easeOutQuad(_animTime,
+			                            							 gemsInitial.y + j * SCREEN_SPACER,
+			                            							 (_selectedBC.getCoordinate().getPosY() - _destinationBC.getCoordinate().getPosY()) * SCREEN_SPACER,
+			                            							 _animTotalTime);
+			                        }
+	                    			batch.setColor(colorTint);
+	    		                    batch.draw(img, imgX, imgY);
+	    		                    batch.setColor(_imgColor);
+	                    		}else if( i == _destinationBC.getCoordinate().getPosX() && j == _destinationBC.getCoordinate().getPosY() ){
+	                    			System.out.println("currently drawing at position of the destination object");
+	                    		}
+	                    			
+	                    	}
+	                    	                    	
 	                    	if( _state == State.AttackingOpponentCharacter || _state == State.StackingCharacter){
 //	                    	if( _state == State.AttackingOpponentCharacter ){
 //	                    		System.err.println("Here is the SELECTED BC ::::::: " + _selectedBC.toString());
@@ -609,7 +655,7 @@ public class StateGame extends State {
 	                    	}//end if( _state == State.MovingCharacter){
 	                    }// end if( _destinationBC != null && _selectedBC != null){	
 	                    
-	                    if( _state != State.AttackingOpponentCharacter && _state != State.MovingCharacter && _state != State.StackingCharacter){
+	                    if( _state != State.AttackingOpponentCharacter && _state != State.MovingCharacter && _state != State.StackingCharacter && _state != State.UnStackingCharacter){
 //	                    	if(_selectedBC != null && _destinationBC != null)
                     		batch.setColor(colorTint);
 		                    batch.draw(img, imgX, imgY);
@@ -763,10 +809,13 @@ public class StateGame extends State {
 				    			if(_unstackObjects){
 				    				System.err.println("UnstackUnits");
 				    				System.out.println("UNSTACKING CHARACTER UNIT " + _selectedBC.toString() + " @ " + _selectedBC.getCoordinate().toString());
-				    				_myTaichoBoard.unstackUnits(poc);
+//				    				_myTaichoBoard.unstackUnits(poc);
 				    				_unstackObjects = false;
-				    				_state = State.Wait;
-				    				_selectedBC = null;
+//				    				_state = State.Wait;
+//				    				_selectedBC = null;
+				    				_state = State.UnStackingCharacter;
+				    				_destinationBC = _myTaichoBoard.componentFromCoord(poc);
+				    				_animTime = 0;
 				    			}else{
 				    				System.err.println("MoveUnits");
 				    				_destinationBC = bc;
@@ -774,8 +823,9 @@ public class StateGame extends State {
 //				    				_state = State.Wait;
 				    				_state = State.MovingCharacter;
 				    				_animTime = 0;
+				    				eraseValidMoves();
 				    			}
-				    			eraseValidMoves();
+//				    			eraseValidMoves();
 				    		}
 				    		//start sliding sound
 							_soundUnitSlide.play();
