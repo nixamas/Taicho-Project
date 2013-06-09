@@ -1,9 +1,9 @@
 package com.cosmichorizons.basecomponents;
 
-
-import java.awt.Color;
+//import java.awt.Color;
 import java.util.ArrayList;
 
+import com.badlogic.gdx.graphics.Color;
 import com.cosmichorizons.enums.ComponentImages;
 import com.cosmichorizons.enums.LevelOneLegalMoves;
 import com.cosmichorizons.enums.LevelThreeLegalMoves;
@@ -13,7 +13,6 @@ import com.cosmichorizons.enums.Player;
 import com.cosmichorizons.enums.Ranks;
 import com.cosmichorizons.enums.SurroundingBCMoves;
 import com.cosmichorizons.exceptions.BoardComponentNotFoundException;
-import com.cosmichorizons.gameparts.Board;
 import com.cosmichorizons.gameparts.TaichoGameData;
 import com.cosmichorizons.interfaces.MoveManager;
 
@@ -273,6 +272,9 @@ public abstract class MovableObject {
 									//unoccupied BC
 								potentialPosition.setHighlight(true);
 								legalMoves.add(potentialPosition);
+								if(potentialPosition.isBarrier()){
+									blockedPath = true;
+								}
 							} else if (potentialPosition.isOccupied()){
 								//occupied BC
 								if( this.rank != Ranks.LEVEL_THREE && this.rank != Ranks.TAICHO ){

@@ -1,7 +1,8 @@
 package com.cosmichorizons.characters;
 
-import java.awt.Color;
+//import java.awt.Color;
 
+import com.badlogic.gdx.graphics.Color;
 import com.cosmichorizons.basecomponents.MovableObject;
 import com.cosmichorizons.enums.ComponentImages;
 import com.cosmichorizons.enums.Player;

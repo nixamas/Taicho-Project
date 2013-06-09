@@ -1,6 +1,8 @@
 package com.cosmichorizons.enums;
 
-import java.awt.Color;
+import com.badlogic.gdx.graphics.Color;
+
+//import java.awt.Color;
 
 /**
  * Enum for all possible players of the game
@@ -16,6 +18,9 @@ public enum Player {
 		public Color getColor(){
 			return color;
 		}
+		public String getUserReadableString(){
+			return "None";
+		}
 	},
 	PLAYER_ONE{
 		Color color = TaichoColors.PLAYER_ONE_LVL1.getColor();
@@ -24,6 +29,9 @@ public enum Player {
 		}
 		public Color getColor(){
 			return color;
+		}
+		public String getUserReadableString(){
+			return "Player One";
 		}
 	},
 	PLAYER_TWO{
@@ -34,8 +42,12 @@ public enum Player {
 		public Color getColor(){
 			return color;
 		}
+		public String getUserReadableString(){
+			return "Player Two";
+		}
 	};
 	
 	public abstract void setColor(Color col);
 	public abstract Color getColor();
+	public abstract String getUserReadableString();
 }

@@ -1,7 +1,8 @@
 package com.cosmichorizons.gameparts;
-import java.awt.Color;
+//import java.awt.Color;
 import java.util.ArrayList;
 
+import com.badlogic.gdx.graphics.Color;
 import com.cosmichorizons.basecomponents.BoardComponent;
 import com.cosmichorizons.basecomponents.Coordinate;
 import com.cosmichorizons.basecomponents.MovableObject;
@@ -33,6 +34,7 @@ import com.cosmichorizons.exceptions.BoardComponentNotFoundException;
 public class TaichoGameData {
 	BoardComponent[][] board;
 	private Player player1, player2, currentPlayer;
+	private boolean gameInPlay = true;
 
 	/**
 	 * Constructor. Create the board and set it up for a new game.
@@ -47,10 +49,15 @@ public class TaichoGameData {
 	}//TaichoGameData
 
 	public TaichoGameData(){
-		player1 = Player.PLAYER_ONE;
-		player2 = Player.PLAYER_TWO;
-		board = new BoardComponent[9][15];
-		setUpGame();
+		try{
+			player1 = Player.PLAYER_ONE;
+			player2 = Player.PLAYER_TWO;
+			board = new BoardComponent[9][15];
+			setUpGame();
+		}catch(Throwable th){
+			System.err.println("Error occurred initializing taicho game daat");
+			System.err.println(th.getCause());
+		}
 	}
 	/**
 	 * Set up the board with characters in position for the beginning of a game.
@@ -98,6 +105,10 @@ public class TaichoGameData {
 					// position is empty
 					board[row][col] = new BoardComponent(Location.GAME_BOARD, new Coordinate(col, row, index));
 				}
+				if( ( col == 3 || col == 11 ) && ( row >= 3  && row <= 5) ){
+					//Board component is a barrier
+					board[row][col].setBarrier(true);
+				}
 				if(board[row][col].getLocation() != Location.OUT_OF_BOUNDS){
 					if (row % 2 == col % 2) {
 						board[row][col].setColor(TaichoColors.GAME_BOARD_LIGHT.getColor());
@@ -113,6 +124,17 @@ public class TaichoGameData {
 		
 	} // end setUpGame()
 
+	public void nextTurn(Player nextPlayer){
+		if( nextPlayer != Player.NONE){
+			if( nextPlayer == Player.PLAYER_ONE ){
+				System.out.println("Starting player ones turn");
+				this.currentPlayer = Player.PLAYER_ONE;
+			}else if( nextPlayer == Player.PLAYER_TWO ){
+				System.out.println("Starting player twos turn");
+				this.currentPlayer = Player.PLAYER_TWO;
+			}
+		}
+	}
 	/**
 	 * Return the BC of the square in the specified row and column.
 	 * If row or column are out of bounds a 'BoardComponentNotFoundException' is thrown
@@ -264,6 +286,10 @@ public class TaichoGameData {
 		this.player2 = player2;
 	}	
 	
+	public boolean isGameInPlay(){
+		return this.gameInPlay;
+	}
+	
 	/**
      * Move units from one BC to another. params are coordinates of new location. 
      * @param coor
@@ -364,7 +390,11 @@ public class TaichoGameData {
 	    				victimBc.setCharacter( attackingBc.removeCharacter() );
 	    				attackingBc.setSelected(false);
 	    				return true;
-	    			}else{
+	    			}else if(oppressingCharacter.getCombatValue() >= victimCharacter.getCombatValue() && victimCharacter.getRank() == Ranks.TAICHO){
+	    				// A taicho character has been killed, game is over
+	    				System.out.println("Game is over, taicho is dead");
+	    				this.gameInPlay = false;
+    				}else{
 	    				//attacking character can beat victim using teammates
 	    				System.out.println("Multiple samurais are about to kill you...");
 	    				victimBc.removeCharacter();

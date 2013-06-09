@@ -1,5 +1,5 @@
 package com.cosmichorizons.gameparts;
-import java.awt.Color;
+//import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
+import com.badlogic.gdx.graphics.Color;
 import com.cosmichorizons.basecomponents.BoardComponent;
 import com.cosmichorizons.basecomponents.Coordinate;
 import com.cosmichorizons.basecomponents.MovableObject;
@@ -64,7 +65,7 @@ public class Board extends JPanel implements ActionListener, MouseListener {
 		validMoves = new ArrayList<BoardComponent>();
 		boardProperties = new BoardDimensions(27);          ///     <<<<<<<<<<<<<<<<<<<< CHANGE SCREEN SIZE
 		showIcons = false;								/// 		<<<<<<<<<<<<<<<<<<<< SET TRUE FOR IMAGE ICONS INSTEAD OF SHAPES
-		setBackground(Color.BLACK);
+//		setBackground(Color.BLACK);
 		addMouseListener(this);
 		currentPlayer = Player.NONE;
 		unstackBtn = unstckBtn;
@@ -122,7 +123,7 @@ System.out.println("Board constructor");
 		
 		/* Draw a two-pixel black border around the edges of the canvas. Used as player turn indicator */
 		System.out.println("Painting on screen Components");
-		g.setColor(currentPlayer.getColor()); 		
+//		g.setColor(currentPlayer.getColor()); 		
 		/* Draw player indicator box around  */
 		g.drawRect(0, 0, bL - 1, bW - 1);
 		g.drawRect(1, 1, bL - 3, bW - 3);
@@ -133,12 +134,12 @@ System.out.println("Board constructor");
 				BoardComponent bc = board.pieceAt(row, col);
 				if (bc.getLocation() != Location.OUT_OF_BOUNDS) {
 
-					g.setColor(bc.getColor());				
+//					g.setColor(bc.getColor());				
 					g.fillRect(2 + col * compSize, 2 + row * compSize, compSize, compSize);
 
 					if(bc.isOccupied()){
 						if(showIcons){	//if showIcons is true then use icons, else draw boxes
-							g.setColor(bc.getCharacter().getColor());
+//							g.setColor(bc.getCharacter().getColor());
 							g.fillRect(2 + charOffset + col * compSize, 2 + charOffset + row * compSize, charSize, charSize);
 
 							Ranks r = bc.getCharacter().getRank();
@@ -162,20 +163,20 @@ System.out.println("Board constructor");
 							}
 							g.drawImage(icon,  2 + charOffset + col * compSize,  2 + charOffset + row * compSize, charSize - 7, charSize - 7, null);
 						}else{
-							g.setColor(bc.getCharacter().getColor());
+//							g.setColor(bc.getCharacter().getColor());
 							g.fillRect(2 + charOffset + col * compSize, 2 + charOffset + row * compSize, charSize, charSize);
 								//give characters 'hats' and make Taichos different
 							if(bc.getCharacter().getRank() == Ranks.TAICHO){
-								g.setColor(Utils.blendColor(bc.getCharacter().getColor(), Color.BLACK, 0.3));
+//								g.setColor(Utils.blendColor(bc.getCharacter().getColor(), Color.BLACK, 0.3));
 							}else{
-								g.setColor(Utils.blendColor(bc.getCharacter().getColor(), Color.WHITE, 0.7));
+//								g.setColor(Utils.blendColor(bc.getCharacter().getColor(), Color.WHITE, 0.7));
 							}
 							g.fillRect(2 + charOffset + col * compSize, 2 + charOffset + row * compSize, charSize - charSize/2, charSize - charSize/2);
 						}
 						
 					}
 				}else{
-					g.setColor(bc.getColor());
+//					g.setColor(bc.getColor());
 					g.fillRect(2 + col * compSize, 2 + row * compSize, compSize, compSize);
 				}
 			}

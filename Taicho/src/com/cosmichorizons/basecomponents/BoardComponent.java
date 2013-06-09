@@ -1,6 +1,7 @@
 package com.cosmichorizons.basecomponents;
-import java.awt.Color;
+//import java.awt.Color;
 
+import com.badlogic.gdx.graphics.Color;
 import com.cosmichorizons.characters.EmptyObject;
 import com.cosmichorizons.enums.Location;
 import com.cosmichorizons.enums.Player;
@@ -47,6 +48,9 @@ public class BoardComponent {
 			return false;
 		}
 //		return occupied;
+	}
+	public Player getCharacterPlayer(){
+		return this.getCharacter().getPlayer();
 	}
 	public MovableObject getCharacter() {
 		if(character != null){
@@ -140,6 +144,7 @@ public class BoardComponent {
 		buff.append("Location :: " + location + spltr);
 		buff.append("high-occ :: " + highlight + "-" +occupied + spltr);
 		buff.append("Char :: " + character + spltr);
+		buff.append("isBarrier :: " + barrier);
 		
 		return buff.toString();
 	}

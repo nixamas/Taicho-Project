@@ -3,9 +3,8 @@ package com.cosmichorizons.taicho;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.siondream.freegemas.PlatformResolver;
 
-public class AndroidResolver implements PlatformResolver, com.cosmichorizon.taicho.PlatformResolver {
+public class AndroidResolver implements PlatformResolver {
 	
 	public String getDefaultLanguage() {
 		return java.util.Locale.getDefault().toString();
