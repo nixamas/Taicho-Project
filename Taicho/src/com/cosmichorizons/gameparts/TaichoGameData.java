@@ -1,11 +1,14 @@
 package com.cosmichorizons.gameparts;
 //import java.awt.Color;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 import com.badlogic.gdx.graphics.Color;
 import com.cosmichorizons.basecomponents.BoardComponent;
 import com.cosmichorizons.basecomponents.Coordinate;
 import com.cosmichorizons.basecomponents.MovableObject;
+import com.cosmichorizons.basecomponents.ObjectMove;
+import com.cosmichorizons.basecomponents.ObjectMove.MOVE_TYPE;
 import com.cosmichorizons.characters.EmptyObject;
 import com.cosmichorizons.characters.OneUnit;
 import com.cosmichorizons.characters.TaichoUnit;
@@ -35,6 +38,7 @@ public class TaichoGameData {
 	BoardComponent[][] board;
 	private Player player1, player2, currentPlayer;
 	private boolean gameInPlay = true;
+	private LinkedList<ObjectMove> moves;
 
 	/**
 	 * Constructor. Create the board and set it up for a new game.
@@ -44,6 +48,7 @@ public class TaichoGameData {
 		System.out.println("ObjectData constructor");
 		player1 = p1;
 		player2 = p2;
+		this.moves = new LinkedList<ObjectMove>();
 		board = new BoardComponent[9][15];
 		setUpGame();
 	}//TaichoGameData
@@ -52,6 +57,7 @@ public class TaichoGameData {
 		try{
 			player1 = Player.PLAYER_ONE;
 			player2 = Player.PLAYER_TWO;
+			this.moves = new LinkedList<ObjectMove>();
 			board = new BoardComponent[9][15];
 			setUpGame();
 		}catch(Throwable th){
@@ -304,6 +310,14 @@ public class TaichoGameData {
     		bc.setCharacter( temp );
     	}
     	selectedBc.setSelected(false);
+    	addTurn(currentPlayer, selectedBc.getCoordinate(), bc.getCoordinate(), ObjectMove.MOVE_TYPE.MOVE, new EmptyObject() );
+    }
+    
+    private void undoMove(ObjectMove lastTurn){
+    	System.out.println("undoMove");
+    	BoardComponent startBc = componentFromCoord( lastTurn.getStart() );
+    	BoardComponent endBc = componentFromCoord( lastTurn.getFinish() );
+    	startBc.setCharacter( endBc.removeCharacter() );
     }
     
 	/**
@@ -339,30 +353,51 @@ public class TaichoGameData {
 	    					}
 	    					bc.setCharacter(newChar);
 	    					selectedBc.setSelected(false);
-//	    					return true;
+	    					addTurn(currentPlayer, selectedBc.getCoordinate(), bc.getCoordinate(), ObjectMove.MOVE_TYPE.STACK, new EmptyObject() );
 	    					success = true;
-	    				}else{
-		    				success = false;
-		    			}
-	    			}else{
-	    				success = false;
-	    			}
-	    			}else{
-	    				success = false;
-	    			}
-	    		}else{
-	    			success = false;
-	    		}
+	    				}else{ success = false; }
+	    			}else{ success = false; }
+	    			}else{ success = false; }
+	    		}else{ success = false; }
 	    	}else{
-//	    		return false;
 	    		success = false;
 	    	}
-//	    	return false;
-//	    	success = false;
     	}catch(BoardComponentNotFoundException bcnfe){
     		System.err.print("Exception thrown while attempting to stack units  ::: ");
     	}
     	return success;
+    }
+    
+    private void undoStack(ObjectMove lastTurn){
+    	System.out.println("undoStack");
+    	BoardComponent startBc = componentFromCoord( lastTurn.getStart() );
+    	BoardComponent endBc = componentFromCoord( lastTurn.getFinish() );
+    	if( endBc.isOccupied() ){
+    		MovableObject unit = endBc.getCharacter();
+    		switch( unit.getRank() ){
+	    		case LEVEL_TWO:
+					TwoUnit selectedTwoUnit = (TwoUnit) endBc.getCharacter();
+					MovableObject mo21 = selectedTwoUnit.removeUnitFromStack();
+					MovableObject mo20 = selectedTwoUnit.removeUnitFromStack();
+					startBc.setCharacter( mo21 );
+					endBc.setCharacter( mo20 );
+					break;
+				case LEVEL_THREE:
+					ThreeUnit selectedThreeUnit = (ThreeUnit) endBc.getCharacter();
+					MovableObject mo32 = selectedThreeUnit.removeUnitFromStack();
+					MovableObject mo31 = selectedThreeUnit.removeUnitFromStack();
+					MovableObject mo30 = selectedThreeUnit.removeUnitFromStack();
+					startBc.setCharacter( mo32 );
+					endBc.setCharacter( new TwoUnit( unit.getPlayer(), mo31, mo30 ) );
+					break;
+				case LEVEL_ONE:
+				case TAICHO:
+				case NONE:
+				default:	//no need to do anything
+					System.err.println("character is not able to be unstacked");
+					break;
+    		}
+    	}
     }
     
     /**
@@ -386,7 +421,8 @@ public class TaichoGameData {
     				System.out.println("Yup, not looking good for you :: " + victimBc.getCharacter().toString());
 	    			if(oppressingCharacter.getCombatValue() >= victimCharacter.getCombatValue() && victimCharacter.getRank() != Ranks.TAICHO){
 	    				System.out.println("...Bummer, you've been attacked -- " + victimBc.getCharacter().toString());
-	    				victimBc.removeCharacter(); //dead
+//	    				victimBc.removeCharacter(); //dead
+	    				addTurn(currentPlayer, attackingBc.getCoordinate(), victimBc.getCoordinate(), ObjectMove.MOVE_TYPE.ATTACK, victimBc.removeCharacter() );
 	    				victimBc.setCharacter( attackingBc.removeCharacter() );
 	    				attackingBc.setSelected(false);
 	    				return true;
@@ -397,7 +433,8 @@ public class TaichoGameData {
     				}else{
 	    				//attacking character can beat victim using teammates
 	    				System.out.println("Multiple samurais are about to kill you...");
-	    				victimBc.removeCharacter();
+//	    				victimBc.removeCharacter();
+	    				addTurn(currentPlayer, attackingBc.getCoordinate(), victimBc.getCoordinate(), ObjectMove.MOVE_TYPE.ATTACK, victimBc.removeCharacter() );
 	    				victimBc.setCharacter( attackingBc.removeCharacter() );
 	    				attackingBc.setSelected(false);
 	    				return true;
@@ -416,6 +453,16 @@ public class TaichoGameData {
 		return false;
 	}
 	
+    
+    private void undoAttack(ObjectMove lastTurn){
+    	System.out.println("undoAttack");
+    	BoardComponent startBc = componentFromCoord( lastTurn.getStart() );
+    	BoardComponent endBc = componentFromCoord( lastTurn.getFinish() );
+    	MovableObject zombie = lastTurn.resurrectDeadCharacter();
+    	startBc.setCharacter( endBc.removeCharacter() ); 
+    	endBc.setCharacter( zombie );
+    }
+    
 	/**
      * Does basically the opposite of makeMove.
      * @param row
@@ -436,6 +483,7 @@ public class TaichoGameData {
 					MovableObject mo20 = selectedTwoUnit.removeUnitFromStack();
 					bc.setCharacter( mo21 );
 					selectedBc.setCharacter( mo20 );
+					addTurn(currentPlayer, selectedBc.getCoordinate(), bc.getCoordinate(), ObjectMove.MOVE_TYPE.UNSTACK, new EmptyObject() );
 					break;
 				case LEVEL_THREE:
 					ThreeUnit selectedThreeUnit = (ThreeUnit) selectedBc.getCharacter();
@@ -444,6 +492,7 @@ public class TaichoGameData {
 					MovableObject mo30 = selectedThreeUnit.removeUnitFromStack();
 					bc.setCharacter( mo32 );
 					selectedBc.setCharacter( new TwoUnit( p, mo31, mo30 ) );
+					addTurn(currentPlayer, selectedBc.getCoordinate(), bc.getCoordinate(), ObjectMove.MOVE_TYPE.UNSTACK, new EmptyObject() );
 					break;
 				case LEVEL_ONE:
 				case TAICHO:
@@ -456,4 +505,54 @@ public class TaichoGameData {
     	selectedBc.setSelected(false);
     	return true;
     }
+    
+    private void undoUnstack(ObjectMove lastTurn){
+    	System.out.println("undoUnstack");
+    	BoardComponent startBc = componentFromCoord( lastTurn.getStart() );
+    	BoardComponent endBc = componentFromCoord( lastTurn.getFinish() );
+    	switch(startBc.getCharacter().getRank()){
+	    	case LEVEL_ONE:
+	    		startBc.setCharacter( new TwoUnit(lastTurn.getPlayer(), startBc.removeCharacter(), endBc.removeCharacter()) );
+	    		break;
+	    	case LEVEL_TWO:
+	    		startBc.setCharacter( new ThreeUnit(lastTurn.getPlayer(), startBc.removeCharacter(), endBc.removeCharacter()) );
+	    		break;
+	    	default:
+	    		break;
+    	}
+    	
+    }
+    
+    public LinkedList<ObjectMove> getMoves(){
+    	return this.moves;
+    }
+    
+    private void addTurn(Player p, Coordinate startC, Coordinate endC, ObjectMove.MOVE_TYPE type, MovableObject r){
+    	ObjectMove move = new ObjectMove(p, startC, endC, type, r);
+    	System.out.println("Adding Turn :::: " + move.toString() );
+    	this.moves.add(move);
+    }
+    
+    public void undoTurn(){
+    	performUndo();
+    }
+    
+    private void performUndo(){
+    	ObjectMove lastTurn = this.moves.removeLast();
+    	System.out.println("LAST MOVE :: " + lastTurn.toString() );    	
+    	switch(lastTurn.getMoveType()){
+    		case ATTACK:
+    			undoAttack(lastTurn);
+    			break;
+    		case MOVE:
+    			undoMove(lastTurn);
+    			break;
+    		case STACK:
+    			undoStack(lastTurn);
+    			break;
+    		case UNSTACK:
+    			undoUnstack(lastTurn);
+    			break;
+    	}
+    }   
 }

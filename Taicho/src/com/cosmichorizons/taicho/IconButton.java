@@ -20,7 +20,6 @@ public class IconButton extends Button{
 	}
 
 	public void toggleState(){
-		System.out.println("Toggling the state of the buttons");
 		if( this.buttonState == bstate.state1 ){
 			this.buttonState = bstate.state2;
 			if( this._state2Icon != null){
@@ -43,7 +42,6 @@ public class IconButton extends Button{
 	
 	@Override
 	public boolean isClicked(int mX, int mY) {
-		System.err.println("checking if music button has been pressed");
 		if (mX > _pos.x &&
 				mX < _pos.x + _width &&
 			    mY > _pos.y &&

@@ -1,6 +1,7 @@
 package com.cosmichorizons.taicho;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -18,6 +19,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Logger;
 import com.cosmichorizons.basecomponents.BoardComponent;
 import com.cosmichorizons.basecomponents.Coordinate;
+import com.cosmichorizons.basecomponents.ObjectMove;
 import com.cosmichorizons.enums.Animation;
 import com.cosmichorizons.enums.Location;
 import com.cosmichorizons.enums.Player;
@@ -58,7 +60,7 @@ public class StateGame extends State {
 	private TextureRegion _imgBoard, _imgSelector, _imgLvl1, _imgLvl2, _imgLvl3, _imgTaicho;
 	
 	// GUI Buttons
-	private Button _unstackUnitButton, _exitButton;
+	private Button _unstackUnitButton, _exitButton, _submitButton, _backButton;
 	private IconButton _musicButton;
 	
 	//Sounds
@@ -73,7 +75,7 @@ public class StateGame extends State {
 	private double _animTime, _animTotalTime;
 //	private double _animTotalInitTime;
 	
-	private boolean soundIsOn = true, musicIsOn = true;
+	private boolean turnSubmit = false, moveMade = false, soundIsOn = true, musicIsOn = true;
 	
 	// Mouse pos
 	private Vector3 _mousePos = null;
@@ -88,8 +90,8 @@ public class StateGame extends State {
 	private Color _imgColor = Color.WHITE.cpy();
 	private Coordinate _coord = new Coordinate();
 	
-	private boolean DEBUG = Boolean.TRUE;	//controls whether debug data is shown
-	private boolean TURNS = Boolean.FALSE;	//controls whether the game controls players turns
+	private boolean DEBUG = Boolean.FALSE;	//controls whether debug data is shown
+	private boolean TURNS = Boolean.TRUE;	//controls whether the game controls players turns
 	
 	
 	public StateGame(Taicho taicho) {
@@ -109,8 +111,9 @@ public class StateGame extends State {
 		// Create buttons
 		_exitButton = new Button(_parent, 20, 630, _lang.getString("Exit"));
 		_unstackUnitButton = new Button(_parent, 20, 550, _lang.getString("UnStack Unit"));
-//		_musicButton = new Button(_parent, 950, 630, "");
-		_musicButton = new IconButton(_parent, 975, 650, "");
+		_submitButton = new Button(_parent, 975, 550, _lang.getString("Submit") );
+		_backButton = new Button(_parent, 975, 630, _lang.getString("Back") );
+		_musicButton = new IconButton(_parent, 975, 20, "");
 		
 		// Create board
 		_myTaichoBoard = new TaichoGameData();
@@ -173,14 +176,20 @@ public class StateGame extends State {
 
 		_exitButton.setIcon(null);
 		_unstackUnitButton.setIcon(null);
+		_submitButton.setIcon(null);
+		_backButton.setIcon(null);
 		_musicButton.setIcon(null);
 
 		_exitButton.setBackground(null);
 		_unstackUnitButton.setBackground(null);
+		_submitButton.setBackground(null);
+		_backButton.setBackground(null);
 		_musicButton.setBackground(null);
 		
 		_exitButton.setFont(null);
 		_unstackUnitButton.setFont(null);
+		_submitButton.setFont(null);
+		_backButton.setFont(null);
 		_musicButton.setFont(null);
 		
 		_soundBackgroundMusic = null;
@@ -261,18 +270,26 @@ public class StateGame extends State {
 		
 		_exitButton.setIcon(iconExit);
 		_unstackUnitButton.setIcon(iconUnstack);
+		_submitButton.setIcon(iconExit);
+		_backButton.setIcon(iconExit);		
 		iconMusic.flip(false, true);
 		iconMusicOff.flip(false, true);
 		_musicButton.setButtonIcons(iconMusic, iconMusicOff);
 
 		_exitButton.setBackground(buttonBackground);
 		_unstackUnitButton.setBackground(buttonBackground);
+		_submitButton.setBackground(buttonBackground);
+		_backButton.setBackground(buttonBackground);
 
 		_exitButton.setBackgroundClicked(buttonBackgroundClicked);
 		_unstackUnitButton.setBackgroundClicked(buttonBackgroundClicked);
+		_submitButton.setBackgroundClicked(buttonBackgroundClicked);
+		_backButton.setBackgroundClicked(buttonBackgroundClicked);
 
 		_exitButton.setFont(_fontText);
 		_unstackUnitButton.setFont(_unstackBtnFontText);
+		_submitButton.setFont(_fontText);
+		_backButton.setFont(_fontText);
 
 		Gdx.input.setInputProcessor(this);
 	}
@@ -353,7 +370,7 @@ public class StateGame extends State {
 							_animTime = 0;
 							_state = State.Wait;
 							
-							this.nextTurn();
+							this.moveHasBeenMade();
 						}
 		}
 		
@@ -400,6 +417,10 @@ public class StateGame extends State {
 //		_musicButton.render();
 		_exitButton.render();
 		_musicButton.render();
+		if( hasMoveBeenMade() ){
+			_submitButton.render();
+			_backButton.render();
+		}
 
 		
 		
@@ -422,6 +443,13 @@ public class StateGame extends State {
 //				_txtTime,
 //				390 - _fontTime.getBounds(_txtTime).width,
 //				237);
+		
+		if( false/*this.DEBUG*/ ){	// DEBUG
+			LinkedList<ObjectMove> gameMoves = _myTaichoBoard.getMoves();
+			for(int i = 0; i < gameMoves.size(); i++){
+				_debugFont.draw(batch, gameMoves.get(i).toString(), 20, 20 * i);
+			}
+		}
 		
 		// Draw board
 		TextureRegion img = null;
@@ -729,7 +757,7 @@ public class StateGame extends State {
 		    	System.out.println("" + bc.toString());
 		    	System.err.println("************* BOARD SQUARE DATE *************");
 		    	
-		    	if(bc.getLocation() != Location.OUT_OF_BOUNDS){	//if player clicks on the game board
+		    	if(bc.getLocation() != Location.OUT_OF_BOUNDS && !hasMoveBeenMade() ){	//if player clicks on the game board
 					if(validMoves.isEmpty() 
 							&& _selectedBC == null 
 								&& bc.isOccupied() 
@@ -827,6 +855,17 @@ public class StateGame extends State {
 	        		showValidUnstack();
 	        		_unstackObjects = true;
 	        	}
+	        }
+	        else if(_submitButton.isClicked((int)_mousePos.x, (int)_mousePos.y) && hasMoveBeenMade() ){
+	        	System.out.println("_submitButton has been pressed");
+	        	this.nextTurn();
+	        	_submitButton.touchUp();
+	        }
+	        else if(_backButton.isClicked((int)_mousePos.x, (int)_mousePos.y) && hasMoveBeenMade() ){
+	        	System.out.println("_backButton has been pressed");
+	        	_myTaichoBoard.undoTurn();
+	        	setBeginingOfTurn();
+	        	_backButton.touchUp();
 	        }
 		}
 
@@ -974,6 +1013,7 @@ public class StateGame extends State {
 		}else{
 			System.err.println("No current player...");
 		}
+		setBeginingOfTurn();
 	}
 	
 	@Override
@@ -989,5 +1029,26 @@ public class StateGame extends State {
 			System.err.println("Game is still in play");
 		}
 		return winner;
+	}
+	
+	private boolean hasMoveBeenMade(){
+		return this.moveMade;
+	}
+	
+	private void moveHasBeenMade(){
+		this.moveMade = true;
+	}
+		
+	private boolean readyToEndTurn(){
+		return this.turnSubmit;
+	}
+	
+	private void setEndOfTurn(){
+		this.turnSubmit = true;
+	}
+	
+	private void setBeginingOfTurn(){
+		this.turnSubmit = false;
+		this.moveMade = false;
 	}
 }
