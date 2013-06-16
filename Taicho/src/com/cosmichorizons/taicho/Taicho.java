@@ -16,6 +16,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Logger;
 import com.cosmichorizons.enums.Player;
+import com.cosmichorizons.utilities.SystemConfiguration;
 
 public class Taicho implements ApplicationListener {
 	
@@ -93,6 +94,11 @@ public class Taicho implements ApplicationListener {
 		_states.put("StateMenu", new StateMenu(this));
 		_states.put("StateGameOverMenu", new StateGameOverMenu(this));
 //		_states.put("StateHowto", new StateHowto(this));
+		
+		// TESTING
+		SystemConfiguration sc = new SystemConfiguration();
+		// TESTING
+		
 		
 		// Asign initial state 
 		changeState("StateMenu");

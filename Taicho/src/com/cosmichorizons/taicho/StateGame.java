@@ -26,6 +26,7 @@ import com.cosmichorizons.enums.Player;
 import com.cosmichorizons.enums.Ranks;
 import com.cosmichorizons.exceptions.BoardComponentNotFoundException;
 import com.cosmichorizons.gameparts.TaichoGameData;
+import com.cosmichorizons.utilities.SystemConfiguration;
 
 public class StateGame extends State {
 
@@ -55,6 +56,8 @@ public class StateGame extends State {
 	private BoardComponent _selectedBC, _destinationBC;
 
 	private TaichoGameData _myTaichoBoard;
+	
+	private SystemConfiguration _systemConfig;
 		
 	// Game elements textures
 	private TextureRegion _imgBoard, _imgSelector, _imgLvl1, _imgLvl2, _imgLvl3, _imgTaicho;
@@ -118,6 +121,10 @@ public class StateGame extends State {
 		
 		// Create board
 		_myTaichoBoard = new TaichoGameData();
+		
+		_systemConfig = new SystemConfiguration();
+		soundIsOn = _systemConfig.isSoundSet();
+		musicIsOn = _systemConfig.isMusicSet();
 		
 		validMoves = new ArrayList<BoardComponent>();
 		
@@ -249,7 +256,7 @@ public class StateGame extends State {
 		_soundUnitSlide = assetManager.get("data/slide.ogg", Sound.class);
 		
 		// Play music if it wasn't playing
-		if (!_soundBackgroundMusic.isPlaying()) {
+		if (!_soundBackgroundMusic.isPlaying() && this.musicIsOn) {
 			_soundBackgroundMusic.setLooping(true);
 			_soundBackgroundMusic.play();
 		}
@@ -278,8 +285,8 @@ public class StateGame extends State {
 		_backButton.setIcon(iconExit);		
 		iconMusic.flip(false, true);
 		iconMusicOff.flip(false, true);
-		_musicButton.setButtonIcons(iconMusic, iconMusicOff);
-		_soundButton.setButtonIcons(iconExit, iconMusicOff);
+		_musicButton.setButtonIcons(iconMusic, iconMusicOff, this.musicIsOn);
+		_soundButton.setButtonIcons(iconExit, iconMusicOff, this.soundIsOn);
 
 		_exitButton.setBackground(buttonBackground);
 		_unstackUnitButton.setBackground(buttonBackground);
@@ -328,8 +335,7 @@ public class StateGame extends State {
 		}
 		
 //		System.err.print("******* STATE :: " + _state + " with _animTime of :: " + _animTime);
-		if( _state == State.MovingCharacter 
-//				){
+		if( _state == State.MovingCharacter
 				|| _state == State.AttackingOpponentCharacter
 				|| _state == State.StackingCharacter
 				|| _state == State.UnStackingCharacter){
@@ -379,14 +385,6 @@ public class StateGame extends State {
 						}
 		}
 		
-		// DISAPPEARING BOARD STATE because there were no possible movements
-//	    else if(_state == State.DisappearingBoard) {
-//	            _state = State.InitializeCharacters;
-//
-//	            // Generate a brand new board
-//	            _myTaichoBoard = new TaichoGameData();
-//
-//	    }
 	}
 	
 
@@ -417,9 +415,6 @@ public class StateGame extends State {
 		batch.draw(_imgBoard, 0, 0);
 		
 //		// Draw buttons
-//		_hintButton.render();
-//		_resetButton.render();
-//		_musicButton.render();
 		_exitButton.render();
 		_musicButton.render();
 		_soundButton.render();
@@ -440,16 +435,7 @@ public class StateGame extends State {
 //						"" + _points,
 //						452 - _fontScore.getBounds("" + _points).width,
 //						93);
-		
-		// Draw the time
-//		batch.draw(_imgTimeBackground, 70, 215);
-//		_fontText.draw(batch, _lang.getString("Time left"), 78, 180);
-				 
-//		_fontTime.draw(batch,
-//				_txtTime,
-//				390 - _fontTime.getBounds(_txtTime).width,
-//				237);
-		
+				
 		if( false/*this.DEBUG*/ ){	// DEBUG
 			LinkedList<ObjectMove> gameMoves = _myTaichoBoard.getMoves();
 			for(int i = 0; i < gameMoves.size(); i++){
@@ -842,11 +828,23 @@ public class StateGame extends State {
 	        else if( _musicButton.isClicked((int) _mousePos.x, (int) _mousePos.y) ){
 	        	System.out.print("music button has been pressed....");
 	        	_musicButton.toggleState();
-	        	if( _soundBackgroundMusic.isPlaying() ){
-	        		_soundBackgroundMusic.pause();
-	        	}else if(!_soundBackgroundMusic.isPlaying()){
-	        		_soundBackgroundMusic.play();
+	        	if( this.musicIsOn == false ){
+	        		System.out.println("Turning music on");
+	        		this.musicIsOn = true;
+	        		if( _soundBackgroundMusic.isPlaying() ){
+		        		_soundBackgroundMusic.pause();
+		        	}else if(!_soundBackgroundMusic.isPlaying() ){
+		        		_soundBackgroundMusic.play();
+		        	}
+	        	}else if( this.musicIsOn == true ){
+	        		System.out.println("Turning music off");
+	        		this.musicIsOn = false;
+	        		if( _soundBackgroundMusic.isPlaying() ){
+	        			_soundBackgroundMusic.stop();
+	        		}
 	        	}
+	        	
+	        	_systemConfig.setMusic( this.musicIsOn );
 	        }
 	        else if(_soundButton.isClicked((int)_mousePos.x, (int)_mousePos.y)){
 	        	System.out.println("Sound Button has been pressed, toggling sound");
@@ -858,6 +856,7 @@ public class StateGame extends State {
 	        		System.out.println("Turning sound off");
 	        		this.soundIsOn = false;
 	        	}
+	        	_systemConfig.setSound( this.soundIsOn );
 	        }
 	        else if(_unstackUnitButton.isClicked((int)_mousePos.x, (int)_mousePos.y)){
 	        	if(_unstackObjects){

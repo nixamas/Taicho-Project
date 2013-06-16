@@ -11,6 +11,32 @@ public class IconButton extends Button{
 		// TODO Auto-generated constructor stub
 		this.buttonState = bstate.state1;
 	}
+	
+	/**
+	 * Sets state according to the boolean state parameter 
+	 * @param state1Icon
+	 * @param state2Icon
+	 * @param state
+	 */
+	public void setButtonIcons(TextureRegion state1Icon, TextureRegion state2Icon, boolean state){	//state(true) = state1, state(false) = state2
+		this._state1Icon = state1Icon;
+		this._state2Icon = state2Icon;
+		if( state ){
+			setIcon(this._state1Icon);
+			setButtonSize(this._state1Icon);
+			this.buttonState = bstate.state1;
+		}else if( !state ){
+			setIcon(this._state2Icon);
+			setButtonSize(this._state2Icon);
+			this.buttonState = bstate.state2;
+		}
+	}
+	
+	/**
+	 * Default sets to state1
+	 * @param state1Icon
+	 * @param state2Icon
+	 */
 	public void setButtonIcons(TextureRegion state1Icon, TextureRegion state2Icon){
 		this._state1Icon = state1Icon;
 		this._state2Icon = state2Icon;
