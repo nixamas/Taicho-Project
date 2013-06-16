@@ -61,7 +61,7 @@ public class StateGame extends State {
 	
 	// GUI Buttons
 	private Button _unstackUnitButton, _exitButton, _submitButton, _backButton;
-	private IconButton _musicButton;
+	private IconButton _musicButton, _soundButton;
 	
 	//Sounds
 	private Music _soundBackgroundMusic;
@@ -114,6 +114,7 @@ public class StateGame extends State {
 		_submitButton = new Button(_parent, 975, 550, _lang.getString("Submit") );
 		_backButton = new Button(_parent, 975, 630, _lang.getString("Back") );
 		_musicButton = new IconButton(_parent, 975, 20, "");
+		_soundButton = new IconButton(_parent, 1020, 20, "");
 		
 		// Create board
 		_myTaichoBoard = new TaichoGameData();
@@ -179,18 +180,21 @@ public class StateGame extends State {
 		_submitButton.setIcon(null);
 		_backButton.setIcon(null);
 		_musicButton.setIcon(null);
+		_soundButton.setIcon(null);
 
 		_exitButton.setBackground(null);
 		_unstackUnitButton.setBackground(null);
 		_submitButton.setBackground(null);
 		_backButton.setBackground(null);
 		_musicButton.setBackground(null);
+		_soundButton.setBackground(null);
 		
 		_exitButton.setFont(null);
 		_unstackUnitButton.setFont(null);
 		_submitButton.setFont(null);
 		_backButton.setFont(null);
 		_musicButton.setFont(null);
+		_soundButton.setFont(null);
 		
 		_soundBackgroundMusic = null;
 		_soundUnitSlide = null;
@@ -275,6 +279,7 @@ public class StateGame extends State {
 		iconMusic.flip(false, true);
 		iconMusicOff.flip(false, true);
 		_musicButton.setButtonIcons(iconMusic, iconMusicOff);
+		_soundButton.setButtonIcons(iconExit, iconMusicOff);
 
 		_exitButton.setBackground(buttonBackground);
 		_unstackUnitButton.setBackground(buttonBackground);
@@ -417,6 +422,7 @@ public class StateGame extends State {
 //		_musicButton.render();
 		_exitButton.render();
 		_musicButton.render();
+		_soundButton.render();
 		if( hasMoveBeenMade() ){
 			_submitButton.render();
 			_backButton.render();
@@ -801,8 +807,10 @@ public class StateGame extends State {
 			    				eraseValidMoves();
 			    			}
 			    		}
-			    		//start sliding sound
-						_soundUnitSlide.play();
+			    		if( playSound() ){
+				    		//start sliding sound
+							_soundUnitSlide.play();
+			    		}
 					}else{
 						//user clicked same BC twice, abort the BC selection
 //						System.out.println("checking if user clicked selected BC again. If so, Abort");
@@ -838,6 +846,17 @@ public class StateGame extends State {
 	        		_soundBackgroundMusic.pause();
 	        	}else if(!_soundBackgroundMusic.isPlaying()){
 	        		_soundBackgroundMusic.play();
+	        	}
+	        }
+	        else if(_soundButton.isClicked((int)_mousePos.x, (int)_mousePos.y)){
+	        	System.out.println("Sound Button has been pressed, toggling sound");
+	        	_soundButton.toggleState();
+	        	if( this.soundIsOn == false ){
+	        		System.out.println("Turning sound on");
+	        		this.soundIsOn = true;
+	        	}else if( this.soundIsOn == true ){
+	        		System.out.println("Turning sound off");
+	        		this.soundIsOn = false;
 	        	}
 	        }
 	        else if(_unstackUnitButton.isClicked((int)_mousePos.x, (int)_mousePos.y)){
@@ -1050,5 +1069,9 @@ public class StateGame extends State {
 	private void setBeginingOfTurn(){
 		this.turnSubmit = false;
 		this.moveMade = false;
+	}
+	
+	private boolean playSound(){
+		return this.soundIsOn;
 	}
 }
