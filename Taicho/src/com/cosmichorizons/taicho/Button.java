@@ -35,6 +35,25 @@ public class Button {
 		_height = 0;
 		_clicked = false;
 	}
+	public Button(Taicho game,
+			  int x,
+			  int y,
+			  String text,
+			  TextureRegion background,
+			  TextureRegion backgroundClicked,
+			  TextureRegion icon,
+			  BitmapFont font) {
+	_game = game;
+	_background = background;
+	_backgroundClicked = backgroundClicked;
+	_icon = icon;
+	_font = font;
+	_text = text;
+	_pos = new Vector2(x, y);
+	_width = 0;
+	_height = 0;
+	_clicked = false;
+}
 	
 	public Button(Taicho game, int x, int y, String text) {
 		_game = game;

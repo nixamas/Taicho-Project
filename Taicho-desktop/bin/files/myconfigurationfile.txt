@@ -1,7 +1,0 @@
-#<--starts a comment line
-#   "key":"value"
-#   look @ SystemConfiguration on what uses this file
-#
-game_in_progress:false
-sound_on:false
-music_on:false

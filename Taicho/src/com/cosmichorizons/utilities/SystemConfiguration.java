@@ -6,6 +6,7 @@ import com.cosmichorizons.gameparts.TaichoGameData;
 
 public class SystemConfiguration {
 	private String GAME_IN_PROGRESS_KEY = "game_in_progress";
+	private String NO_GAME_IN_PROGRESS = "NO_GAME_IN_PROGRESS";
 	private String SOUND_STATE_KEY = "sound_on";
 	private String MUSIC_STATE_KEY = "music_on";
 	private String STATE_ON = "true";
@@ -16,17 +17,31 @@ public class SystemConfiguration {
 	private boolean music = false;
 	private boolean in_progress = false;
 	
-	FileHandle _fileHandle = null;
+	FileHandle _configFileHandle = null;
+	FileHandle _savedGameFileHandle = null;
 	
 	public static void main(String [] args){
-
+//		SystemConfiguration me = new SystemConfiguration();
+//		BoardComponent bc = new BoardComponent(new TaichoUnit(Player.PLAYER_ONE), Location.PLAYER_TWO_CASTLE, new Coordinate(2, 1, 4));
+//		StringBuffer sb = new StringBuffer();
+//		try {
+//			writeObject(bc, sb);
+//		} catch (IllegalArgumentException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (IllegalAccessException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 	
 	public SystemConfiguration(){
 		System.out.println("SystemConfiguration...");
+		boolean windows = false;
 		switch( Gdx.app.getType() ){
 			case Desktop:
-				//assuming Windows 
+				//assuming Windows
+				windows = true;
 				this.NEW_LINE_SEP = "\r\n";
 			case Android:
 				//not sure about android yet
@@ -34,22 +49,53 @@ public class SystemConfiguration {
 				break;
 		}
 		try{
-			_fileHandle = Gdx.files.local("myconfigurationfile.txt");
+			if( !windows ){
+				String extPath = Gdx.files.getExternalStoragePath();
+				_configFileHandle = Gdx.files.external( extPath + "files/myconfigurationfile.txt" );
+			}else if( windows ){
+				_configFileHandle = Gdx.files.local("files\\myconfigurationfile.txt");
+			}
+			if( !windows ){
+				_savedGameFileHandle = Gdx.files.external("files/savedgamefile.txt");
+			}else if( windows ){
+				_savedGameFileHandle = Gdx.files.local("files\\savedgamefile.txt");
+			}
 //			String contents = _fileHandle.readString();
-			parseFileContents( _fileHandle.readString() );	//fills out parameters
-//			setSound(true);
-//			setMusic(true);
-//			setGameInProgress(true);
-//			writeConfigFile();
-//			System.out.println("file contents :: " + contents);
-//			Gdx.app.exit();
+			if( _configFileHandle.exists() ){
+				parseFileContents( _configFileHandle.readString() );	//fills out parameters
+			}else{
+				_configFileHandle.writeString(this.DEFAULT_CONFIG_FILE, false);
+				parseFileContents( _configFileHandle.readString() );	//fills out parameters
+			}
+			
+			this.in_progress = checkForGameInProgress();
+			
 		} catch ( Exception e ){
 			System.err.println("SystemConfiguration Error :: " + e.getMessage());
 		}
 	}
-		
+
+	public boolean checkForGameInProgress(){
+		String contents = _savedGameFileHandle.readString();
+		return !contents.contains( this.NO_GAME_IN_PROGRESS );
+	}
+	
+	public void writeTaichoGameData(TaichoGameData taichoGameData){
+		StringBuffer sb = new StringBuffer();
+		SaveGameObject saveObj = new SaveGameObject( taichoGameData );
+		sb.append( saveObj.getUnitSaveObjectList() );
+		_savedGameFileHandle.writeString(sb.toString(), false );
+	}
+	
+	/**
+	 * writes a string in the savedgamefile.txt signifying that now game was saved
+	 */
+	public void writeNoSaveData(){
+		_savedGameFileHandle.writeString(this.NO_GAME_IN_PROGRESS, false);
+	}
+	
 	private void writeConfigFile(){
-		String contents = _fileHandle.readString();
+		String contents = _configFileHandle.readString();
 		StringBuffer sbContents = new StringBuffer();
 		String [] lines = contents.split( this.NEW_LINE_SEP );
 		for( String line : lines ){
@@ -70,7 +116,7 @@ public class SystemConfiguration {
 			sbContents.append( this.NEW_LINE_SEP );
 		}
 		String newContents = sbContents.toString();
-		_fileHandle.writeString( newContents , false );
+		_configFileHandle.writeString( newContents , false );
 	}
 	
 	private String getKeyBoolValString(String key, boolean val){
@@ -97,6 +143,19 @@ public class SystemConfiguration {
 				}
 			}
 		}
+	}
+	
+	public SaveGameObject parseSaveFile(){
+		SaveGameObject saveObj = null;
+		System.out.println("parsing save file contents");
+		String contents = _savedGameFileHandle.readString();
+		if( contents.contains( this.NO_GAME_IN_PROGRESS ) ) {
+			this.in_progress = false;
+		}else{
+			this.in_progress = true;
+			saveObj = new SaveGameObject( contents/*.substring(1, contents.length() - 1 )*/ );
+		}
+		return saveObj;
 	}
 	
 	private boolean setBooleanVal(String val){
@@ -131,4 +190,6 @@ public class SystemConfiguration {
 		writeConfigFile();
 	}
 	
+	private String DEFAULT_CONFIG_FILE = "#<--starts a comment line\r\n#   key:value\r\n#   look @ SystemConfiguration on what uses this file\r\n#\r\ngame_in_progress:true\r\nsound_on:true\r\nmusic_on:false\r\n";
+
 }

@@ -72,5 +72,8 @@ public class Coordinate {
 	public String toString() {
 		return "Coordinate [posX=" + posX + ", posY=" + posY + "]";
 	}
+	public String toSaveString() {
+		return "{Coordinate:[id=" + id + ", posX=" + posX + ", posY=" + posY + "]}";
+	}
 	
 }

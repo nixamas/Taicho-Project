@@ -21,12 +21,12 @@ public class ThreeUnit extends MovableObject {
 	List<MovableObject> components;
 	
 	public ThreeUnit(Player p) {
-		super(p, Ranks.LEVEL_THREE, ComponentImages.LEVEL_THREE_IMAGE);
+		super(p, Ranks.LEVEL_THREE);
 		combatValue = 3;
 	}
 	
 	public ThreeUnit(Player p, MovableObject comp1, MovableObject comp2, MovableObject comp3){
-		super(p, Ranks.LEVEL_THREE, ComponentImages.LEVEL_THREE_IMAGE);
+		super(p, Ranks.LEVEL_THREE);
 		components = new ArrayList<MovableObject>();
 		components.add(comp1);
 		components.add(comp2);
@@ -35,7 +35,7 @@ public class ThreeUnit extends MovableObject {
 	}
 	
 	public ThreeUnit(Player p, MovableObject comp1, MovableObject comp2){
-		super(p, Ranks.LEVEL_THREE, ComponentImages.LEVEL_THREE_IMAGE);
+		super(p, Ranks.LEVEL_THREE);
 		components = new ArrayList<MovableObject>();
 		ArrayList<MovableObject> tempList;
 		if(comp1.getRank() == Ranks.LEVEL_TWO){
@@ -68,17 +68,17 @@ public class ThreeUnit extends MovableObject {
 		return player;
 	}
 
-	@Override
-	public Color getColor(){
-		if( this.player == Player.PLAYER_ONE ){
-			return TaichoColors.PLAYER_ONE_LVL3.getColor();
-		}else if( this.player == Player.PLAYER_TWO ){
-			return TaichoColors.PLAYER_TWO_LVL3.getColor();
-		}else{
-			return Color.WHITE;
-		}
-//		return Utils.blendColor(this.getPlayer().getColor(), Color.DARK_GRAY, 0.4);
-	}
+//	@Override
+//	public Color getColor(){
+//		if( this.player == Player.PLAYER_ONE ){
+//			return TaichoColors.PLAYER_ONE_LVL3.getColor();
+//		}else if( this.player == Player.PLAYER_TWO ){
+//			return TaichoColors.PLAYER_TWO_LVL3.getColor();
+//		}else{
+//			return Color.WHITE;
+//		}
+////		return Utils.blendColor(this.getPlayer().getColor(), Color.DARK_GRAY, 0.4);
+//	}
 	
 	public MovableObject removeUnitFromStack(){
 			//remove last unit in array from list

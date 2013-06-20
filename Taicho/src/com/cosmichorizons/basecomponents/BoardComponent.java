@@ -20,7 +20,7 @@ public class BoardComponent {
 
 	private final Coordinate coordinate;
 	private final Location location;
-	private Color color = Color.BLACK;
+//	private Color color = Color.BLACK;
 	private boolean occupied = false;
 	private boolean stackable = false;
 	private boolean selected = false;
@@ -82,22 +82,22 @@ public class BoardComponent {
 //	public void setCoordinate(Coordinate coordinate) {
 //		this.coordinate = coordinate;
 //	}
-	public Color getColor() {
-		if(selected){
-			return TaichoColors.GAME_BOARD_SELECTED.getColor();
-		}else if(highlight){
-			return TaichoColors.GAME_BOARD_HIGHLIGHT.getColor();
-		}else if(stackable){
-			return TaichoColors.GAME_BOARD_STACKABLE.getColor();
-		}else if(attackable){
-			return TaichoColors.GAME_BOARD_ATTACKABLE.getColor();
-		}else{
-			return color;
-		}
-	}
-	public void setColor(Color color) {
-		this.color = color;
-	}
+//	public Color getColor() {
+//		if(selected){
+//			return TaichoColors.GAME_BOARD_SELECTED.getColor();
+//		}else if(highlight){
+//			return TaichoColors.GAME_BOARD_HIGHLIGHT.getColor();
+//		}else if(stackable){
+//			return TaichoColors.GAME_BOARD_STACKABLE.getColor();
+//		}else if(attackable){
+//			return TaichoColors.GAME_BOARD_ATTACKABLE.getColor();
+//		}else{
+//			return color;
+//		}
+//	}
+//	public void setColor(Color color) {
+//		this.color = color;
+//	}
 	public boolean isHighlight() {
 		return highlight;
 	}
@@ -152,7 +152,7 @@ public class BoardComponent {
 	@Override
 	public String toString() {
 		return "BoardComponent [coordinate=" + coordinate + ", location="
-				+ location + ", color=" + color + ", occupied=" + occupied
+				+ location + ", occupied=" + occupied
 				+ "\n\t" + "highlight=" + highlight + ", character=" + character + "]";
 	}
 	@Override

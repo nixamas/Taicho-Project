@@ -16,7 +16,7 @@ import com.cosmichorizons.enums.Ranks;
 public class EmptyObject extends MovableObject {
 
 	public EmptyObject() {
-		super(Player.NONE, Ranks.NONE, ComponentImages.NONE);
+		super(Player.NONE, Ranks.NONE);
 	}
 
 }

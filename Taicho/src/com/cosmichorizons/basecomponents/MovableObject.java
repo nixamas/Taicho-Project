@@ -29,7 +29,7 @@ public abstract class MovableObject {
 	protected int combatValue;
 	protected Player player;
 	protected Ranks rank;
-	protected final ComponentImages imageLocation;
+//	protected final ComponentImages imageLocation;
 	private boolean surroundedByEnemies = false;
 
 	/**
@@ -39,10 +39,9 @@ public abstract class MovableObject {
 	 * @param r
 	 * @param ci
 	 */
-	public MovableObject(Player p, Ranks r, ComponentImages ci) {
+	public MovableObject(Player p, Ranks r) {
 		player = p;
 		rank = r;
-		this.imageLocation = ci;
 		switch(rank){
 			case NONE:
 				this.combatValue = -1;
@@ -68,13 +67,13 @@ public abstract class MovableObject {
 	public int getCombatValue(){
 		return this.combatValue;
 	}
-	public Color getColor() {
-		return player.getColor();
-	}
-
-	public void setColor(Color color) {
-		this.player.setColor(color);
-	}
+//	public Color getColor() {
+//		return player.getColor();
+//	}
+//
+//	public void setColor(Color color) {
+//		this.player.setColor(color);
+//	}
 	public void setPlayer(Player p) {
 		player = p;
 	}
@@ -115,9 +114,9 @@ public abstract class MovableObject {
 		this.rank = rank;
 	}
 
-	public ComponentImages getImageLocation() {
-		return imageLocation;
-	}
+//	public ComponentImages getImageLocation() {
+//		return imageLocation;
+//	}
 	
 	public boolean isSurroundedByEnemies() {
 		return surroundedByEnemies;
@@ -317,6 +316,10 @@ public abstract class MovableObject {
 	public String toString() {
 		return "MovableObject [combatValue=" + combatValue + ", player="
 				+ player + ", rank=" + rank + "]";
+	}
+	
+	public String toSaveString() {
+		return "{MovableObject:[player=" + player.getName() + ", rank=" + rank.getName() + "]}";
 	}
 	
 }

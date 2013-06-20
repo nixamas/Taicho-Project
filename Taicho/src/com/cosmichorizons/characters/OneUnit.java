@@ -17,18 +17,18 @@ import com.cosmichorizons.enums.TaichoColors;
 public class OneUnit extends MovableObject {
 	
 	public OneUnit(Player p) {
-		super(p, Ranks.LEVEL_ONE, ComponentImages.LEVEL_ONE_IMAGE);
+		super(p, Ranks.LEVEL_ONE);
 	}
 
-	@Override
-	public Color getColor(){
-		if( this.player == Player.PLAYER_ONE ){
-			return TaichoColors.PLAYER_ONE_LVL1.getColor();
-		}else if( this.player == Player.PLAYER_TWO ){
-			return TaichoColors.PLAYER_TWO_LVL1.getColor();
-		}else{
-			return Color.WHITE;
-		}
-	}
+//	@Override
+//	public Color getColor(){
+//		if( this.player == Player.PLAYER_ONE ){
+//			return TaichoColors.PLAYER_ONE_LVL1.getColor();
+//		}else if( this.player == Player.PLAYER_TWO ){
+//			return TaichoColors.PLAYER_TWO_LVL1.getColor();
+//		}else{
+//			return Color.WHITE;
+//		}
+//	}
 
 }

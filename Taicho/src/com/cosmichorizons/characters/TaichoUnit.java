@@ -15,7 +15,7 @@ import com.cosmichorizons.enums.Ranks;
 public class TaichoUnit extends MovableObject {
 
 	public TaichoUnit(Player p) {
-		super(p, Ranks.TAICHO, ComponentImages.TAICHO_IMAGE);
+		super(p, Ranks.TAICHO);
 	}
 	
 //	@Override

@@ -3,12 +3,10 @@ package com.cosmichorizons.gameparts;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-import com.badlogic.gdx.graphics.Color;
 import com.cosmichorizons.basecomponents.BoardComponent;
 import com.cosmichorizons.basecomponents.Coordinate;
 import com.cosmichorizons.basecomponents.MovableObject;
 import com.cosmichorizons.basecomponents.ObjectMove;
-import com.cosmichorizons.basecomponents.ObjectMove.MOVE_TYPE;
 import com.cosmichorizons.characters.EmptyObject;
 import com.cosmichorizons.characters.OneUnit;
 import com.cosmichorizons.characters.TaichoUnit;
@@ -17,8 +15,8 @@ import com.cosmichorizons.characters.TwoUnit;
 import com.cosmichorizons.enums.Location;
 import com.cosmichorizons.enums.Player;
 import com.cosmichorizons.enums.Ranks;
-import com.cosmichorizons.enums.TaichoColors;
 import com.cosmichorizons.exceptions.BoardComponentNotFoundException;
+import com.cosmichorizons.utilities.SaveGameObject;
 
 
 /**
@@ -52,7 +50,44 @@ public class TaichoGameData {
 		board = new BoardComponent[9][15];
 		setUpGame();
 	}//TaichoGameData
-
+	
+	public TaichoGameData(SaveGameObject savedGameObject){
+		try{
+			player1 = Player.PLAYER_ONE;
+			player2 = Player.PLAYER_TWO;
+			this.moves = new LinkedList<ObjectMove>();
+			board = new BoardComponent[9][15];
+			resumeGame(savedGameObject);
+		}catch(Throwable th){
+			System.err.println("Error occurred initializing taicho game data");
+			System.err.println(th.getCause());
+		}
+	}
+	private void resumeGame(SaveGameObject savedGameObject){
+		currentPlayer = savedGameObject.getCurrentPlayer();
+		int index = 0;
+		int col, row;
+		try{
+			for (col = 0; col < 15; col++) {
+				for (row = 0; row < 9; row++) {
+					if( savedGameObject.isSavedElementAtCoordinate( new Coordinate(col, row) ) ){
+						MovableObject mo = savedGameObject.getCharacterOfElementWithId(index);
+						Location loc = getLocationFromBoardComponentId(index);
+						Coordinate coor = savedGameObject.getCoordinateOfElementWithId(index);
+						coor.setId( index );
+						board[row][col] = new BoardComponent(mo, loc, coor);
+					}else{
+						Location loc = getLocationFromBoardComponentId(index);
+						board[row][col] = new BoardComponent(loc, new Coordinate(col, row, index ));
+					}
+					index++;
+				}
+			}
+		}catch(Exception e){
+			System.err.println(e.getStackTrace());
+		}
+	}
+	
 	public TaichoGameData(){
 		try{
 			player1 = Player.PLAYER_ONE;
@@ -61,7 +96,7 @@ public class TaichoGameData {
 			board = new BoardComponent[9][15];
 			setUpGame();
 		}catch(Throwable th){
-			System.err.println("Error occurred initializing taicho game daat");
+			System.err.println("Error occurred initializing taicho game data");
 			System.err.println(th.getCause());
 		}
 	}
@@ -115,15 +150,15 @@ public class TaichoGameData {
 					//Board component is a barrier
 					board[row][col].setBarrier(true);
 				}
-				if(board[row][col].getLocation() != Location.OUT_OF_BOUNDS){
-					if (row % 2 == col % 2) {
-						board[row][col].setColor(TaichoColors.GAME_BOARD_LIGHT.getColor());
-					} else {
-						board[row][col].setColor(TaichoColors.GAME_BOARD_DARK.getColor());
-					}
-				}else{
-					board[row][col].setColor(Color.BLACK);
-				}
+//				if(board[row][col].getLocation() != Location.OUT_OF_BOUNDS){
+//					if (row % 2 == col % 2) {
+//						board[row][col].setColor(TaichoColors.GAME_BOARD_LIGHT.getColor());
+//					} else {
+//						board[row][col].setColor(TaichoColors.GAME_BOARD_DARK.getColor());
+//					}
+//				}else{
+//					board[row][col].setColor(Color.BLACK);
+//				}
 				index++;
 			}
 		}
@@ -555,4 +590,41 @@ public class TaichoGameData {
     			break;
     	}
     }   
+    
+    public static Location getLocationFromBoardComponentId(int id){
+    	Location loc = Location.OUT_OF_BOUNDS;
+    	if( isBetween(id, 3, 5, 12, 14, 21, 23) ){
+    		loc = Location.PLAYER_ONE_CASTLE;
+    	}else if( isBetween(id, 27, 107) ){
+    		loc = Location.GAME_BOARD;
+    	}else if( isBetween(id, 111, 113, 120, 122, 129, 131) ){
+    		loc = Location.PLAYER_TWO_CASTLE;
+    	}
+    	return loc;
+    }
+    /**
+     * returns true if x is between any of the 3 ranges
+     * @param x
+     * @param min1
+     * @param max1
+     * @param min2
+     * @param max2
+     * @param min3
+     * @param max3
+     * @return
+     */
+    private static boolean isBetween(int x, int min1, int max1, int min2, int max2, int min3, int max3){
+    	if( isBetween(x, min1, max1) || isBetween(x, min2, max2) || isBetween(x, min3, max3) ){
+    		return true;
+    	}else{
+    		return false;
+    	}
+    }
+    private static boolean isBetween(int x, int min, int max){
+    	if( x >= min && x <= max){
+    		return true;
+    	}else{
+    		return false;
+    	}
+    }
 }

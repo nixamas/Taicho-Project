@@ -21,11 +21,11 @@ public class TwoUnit extends MovableObject {
 	List<MovableObject> components;
 	
 	public TwoUnit(Player p) {
-		super(p, Ranks.LEVEL_TWO, ComponentImages.LEVEL_TWO_IMAGE);
+		super(p, Ranks.LEVEL_TWO);
 	}
 	
 	public TwoUnit(Player p, MovableObject comp1, MovableObject comp2){
-		super(p, Ranks.LEVEL_TWO, ComponentImages.LEVEL_TWO_IMAGE);
+		super(p, Ranks.LEVEL_TWO);
 		components = new ArrayList<MovableObject>();
 		components.add(comp1);
 		components.add(comp2);
@@ -40,15 +40,15 @@ public class TwoUnit extends MovableObject {
 		return this.components.remove( this.components.size() - 1 );
 	}
 	
-	@Override
-	public Color getColor(){
-		if( this.player == Player.PLAYER_ONE ){
-			return TaichoColors.PLAYER_ONE_LVL2.getColor();
-		}else if( this.player == Player.PLAYER_TWO ){
-			return TaichoColors.PLAYER_TWO_LVL2.getColor();
-		}else{
-			return Color.WHITE;
-		}
-//		return Utils.blendColor(this.getPlayer().getColor(), Color.GRAY, 0.4);// (, 70);
-	}
+//	@Override
+//	public Color getColor(){
+//		if( this.player == Player.PLAYER_ONE ){
+//			return TaichoColors.PLAYER_ONE_LVL2.getColor();
+//		}else if( this.player == Player.PLAYER_TWO ){
+//			return TaichoColors.PLAYER_TWO_LVL2.getColor();
+//		}else{
+//			return Color.WHITE;
+//		}
+////		return Utils.blendColor(this.getPlayer().getColor(), Color.GRAY, 0.4);// (, 70);
+//	}
 }

@@ -66,6 +66,8 @@ public class StateGame extends State {
 	private Button _unstackUnitButton, _exitButton, _submitButton, _backButton;
 	private IconButton _musicButton, _soundButton;
 	
+	private AlertWindow _popupWindow = null;
+	
 	//Sounds
 	private Music _soundBackgroundMusic;
 	private Sound _soundUnitSlide;
@@ -93,7 +95,7 @@ public class StateGame extends State {
 	private Color _imgColor = Color.WHITE.cpy();
 	private Coordinate _coord = new Coordinate();
 	
-	private boolean DEBUG = Boolean.FALSE;	//controls whether debug data is shown
+	private boolean DEBUG = Boolean.TRUE;	//controls whether debug data is shown
 	private boolean TURNS = Boolean.TRUE;	//controls whether the game controls players turns
 	
 	
@@ -120,11 +122,20 @@ public class StateGame extends State {
 		_soundButton = new IconButton(_parent, 1020, 20, "");
 		
 		// Create board
-		_myTaichoBoard = new TaichoGameData();
+//		_myTaichoBoard = new TaichoGameData();
 		
-		_systemConfig = new SystemConfiguration();
-		soundIsOn = _systemConfig.isSoundSet();
-		musicIsOn = _systemConfig.isMusicSet();
+//		_systemConfig = new SystemConfiguration();
+//		soundIsOn = _systemConfig.isSoundSet();
+//		musicIsOn = _systemConfig.isMusicSet();
+//		
+//		if( _systemConfig.isGameInProgress() ){
+//			_myTaichoBoard = new TaichoGameData( _systemConfig.parseSaveFile() );
+//		}else{
+//			_myTaichoBoard = new TaichoGameData();
+//		}
+		
+		// TESTING
+//		_systemConfig.writeTaichoGameData( _myTaichoBoard ); 
 		
 		validMoves = new ArrayList<BoardComponent>();
 		
@@ -172,7 +183,13 @@ public class StateGame extends State {
 		assetManager.load("data/slide.ogg", Sound.class);
 		assetManager.load("data/myMusicIcon.png", Texture.class);
 		assetManager.load("data/myMusicIconOff.png", Texture.class);
-		resetGame();
+		assetManager.load("data/popupWindowBackground.png", Texture.class);
+//		resetGame();
+		
+		_systemConfig = new SystemConfiguration();
+		soundIsOn = _systemConfig.isSoundSet();
+		musicIsOn = _systemConfig.isMusicSet();
+		
 	}
 	
 	@Override
@@ -228,6 +245,8 @@ public class StateGame extends State {
 		assetManager.unload("data/slide.ogg");
 		assetManager.unload("data/myMusicIcon.png");
 		assetManager.unload("data/myMusicIconOff.png");
+		assetManager.unload("data/popupWindowBackground.png");
+		
 	}
 	
 	@Override
@@ -271,6 +290,7 @@ public class StateGame extends State {
 		TextureRegion iconMusic = new TextureRegion(assetManager.get("data/myMusicIcon.png", Texture.class));
 		TextureRegion iconMusicOff = new TextureRegion(assetManager.get("data/myMusicIconOff.png", Texture.class));
 //		TextureRegion iconMusic = new TextureRegion(assetManager.get("data/iconMusic.png", Texture.class));
+		TextureRegion popupBackground = new TextureRegion(assetManager.get("data/popupWindowBackground.png", Texture.class));
 		
 		buttonBackground.flip(false, true);
 //		iconHint.flip(false, true);
@@ -303,6 +323,18 @@ public class StateGame extends State {
 		_submitButton.setFont(_fontText);
 		_backButton.setFont(_fontText);
 
+		//popup window
+		_popupWindow = new AlertWindow(_parent, 400, 200, "", popupBackground, buttonBackground, buttonBackgroundClicked, _fontText, AlertWindow.Use.NONE); //set default for now, hidden w/ no text
+		_popupWindow.setHidden(true);		//hidden upon start
+
+		if( _systemConfig.isGameInProgress() ){
+			this.showPopupWindow("A game is currently in progress, would you like to resume?", "Resume", "New", AlertWindow.Use.ResumeSaveGame);
+//			_myTaichoBoard = new TaichoGameData( _systemConfig.parseSaveFile() );
+		}else{
+			_myTaichoBoard = new TaichoGameData();
+			_myTaichoBoard.setCurrentPlayer(Player.PLAYER_ONE);
+		}
+		
 		Gdx.input.setInputProcessor(this);
 	}
 	
@@ -422,8 +454,6 @@ public class StateGame extends State {
 			_submitButton.render();
 			_backButton.render();
 		}
-
-		
 		
 		// Draw the score
 //		batch.draw(_imgScoreBackground, 70, 75);
@@ -653,9 +683,9 @@ public class StateGame extends State {
 	                colorTint = Color.WHITE.cpy();
 	            }
 	            
-	            // If the mouse is over a gem
-	            if (hoveringOverUnit((int)_mousePos.x, (int)_mousePos.y)) {
-	                // Draw the selector over that gem
+	            // If the mouse is over a unit and the popup window is hidden
+	            if (hoveringOverUnit((int)_mousePos.x, (int)_mousePos.y) && _popupWindow.isHidden() ) {
+	                // Draw the selector over that unit
 	            	Coordinate coord = getCoord((int)_mousePos.x, (int)_mousePos.y);
 	                batch.draw(_imgSelector,
 	                		  (int)gemsInitial.x + coord.getPosX() * SCREEN_SPACER,
@@ -710,11 +740,13 @@ public class StateGame extends State {
 		                		   (int)gemsInitial.x + validMoves.get(k).getCoordinate().getPosX()* SCREEN_SPACER,
 		                		   (int)gemsInitial.y + validMoves.get(k).getCoordinate().getPosY()* SCREEN_SPACER);
 	                }
-	                
 	                batch.setColor(1.0f, 1.0f, 1.0f, 1.0f);
 	            }
 	        }
 		}
+		
+		//popup window
+		_popupWindow.render();	//only renders if popupWindow.hidden == false, render last so it show on top
 	}
 	
 	@Override
@@ -722,7 +754,6 @@ public class StateGame extends State {
 		if(arg0 == Keys.BACK){
 			_parent.changeState("StateMenu");
 		}
-		
 		return false;
 	}
 	
@@ -735,6 +766,8 @@ public class StateGame extends State {
 	public boolean touchDown(int arg0, int arg1, int arg2, int arg3) {
 		if (arg3 == 0){ // Left mouse button clicked
 			
+			
+			
 			if( _state == State.MovingCharacter || _state == State.AttackingOpponentCharacter ){
 				return false;	//ignore click
 			}
@@ -742,6 +775,42 @@ public class StateGame extends State {
 	        _mousePos.x = arg0;
 	        _mousePos.y = arg1;
 	        _parent.getCamera().unproject(_mousePos);
+	        
+	        if ( !_popupWindow.isHidden() ){	//popup window is open, ignore all click except for those for the buttons
+	        	String state = null;
+	        	if( _popupWindow.isPositiveButtonClicked((int) _mousePos.x, (int) _mousePos.y)){
+	        		state = "positive";
+	        		System.out.println("Positive button has been clicked");
+	        	}else if( _popupWindow.isNegativeButtonClicked((int) _mousePos.x, (int) _mousePos.y)){
+	        		state = "negative";
+	        		System.out.println("Negative button has been clicked");
+	        	}else{
+	        		return false;
+	        	}
+	        	if ( state != null ){	//if one of the buttons were clicked
+		        	// save game popup window is open
+		        	if( _popupWindow.getMyCurrentUse() == AlertWindow.Use.SaveCurrentGame ){
+		    			if( "positive".equalsIgnoreCase(state) ){	// User wants to save game
+		    				_systemConfig.writeTaichoGameData(_myTaichoBoard );
+		    			}else if( "negative".equalsIgnoreCase(state) ){	//User does not want to save
+		    				_systemConfig.writeNoSaveData();
+		    			}
+		    			
+			            _parent.changeState("StateMenu");
+		        	// resume game popup window is open
+		    		}else if( _popupWindow.getMyCurrentUse() == AlertWindow.Use.ResumeSaveGame ){
+		    			if( "positive".equalsIgnoreCase(state) ){	// Resume current game
+		    				_myTaichoBoard = new TaichoGameData( _systemConfig.parseSaveFile() );
+		    			}else if( "negative".equalsIgnoreCase(state) ){		// lets start a new game
+		    				_myTaichoBoard = new TaichoGameData();
+		    				_myTaichoBoard.setCurrentPlayer(Player.PLAYER_ONE);		//Set starting player
+		    			}
+		    		}
+		        	_popupWindow.close();
+					return true;
+	        	}
+			}
+
 	        Coordinate poc = getCoord((int)_mousePos.x, (int)_mousePos.y);
 	        try{
 	        	BoardComponent bc = _myTaichoBoard.componentFromCoord(getCoord((int)_mousePos.x, (int)_mousePos.y));
@@ -756,7 +825,6 @@ public class StateGame extends State {
 									&& ((bc.getCharacterPlayer() == _myTaichoBoard.getCurrentPlayer()) || !this.TURNS) ){		//if there is no valid moves (no BC selected)
 //						System.err.println("valid moves is empty, first click");
 						selectBoardComponent(poc.getPosY(), poc.getPosX());
-//						currentPlayer = bc.getCharacter().getPlayer();
 						_selectedBC = bc;
 						_destinationBC = null;
 						_state = State.SelectedCharacter;
@@ -799,7 +867,6 @@ public class StateGame extends State {
 			    		}
 					}else{
 						//user clicked same BC twice, abort the BC selection
-//						System.out.println("checking if user clicked selected BC again. If so, Abort");
 			    		BoardComponent selectedBc = _myTaichoBoard.getSelectedBoardComponent();
 			    		if(bc.getCoordinate().equals( selectedBc.getCoordinate() )){
 			    				//if there is a selected BC then and the user clicked it a second time, 
@@ -823,7 +890,8 @@ public class StateGame extends State {
 	        
 	        // Buttons 
 	        if (_exitButton.isClicked((int)_mousePos.x, (int)_mousePos.y)) {
-	            _parent.changeState("StateMenu");
+	        	//Show popup window prompting for save
+	        	this.showPopupWindow("Would you like to save this game?", "Save", "Ignore", AlertWindow.Use.SaveCurrentGame);
 	        }
 	        else if( _musicButton.isClicked((int) _mousePos.x, (int) _mousePos.y) ){
 	        	System.out.print("music button has been pressed....");
@@ -948,9 +1016,6 @@ public class StateGame extends State {
 	    		validMoves = bc.getCharacter().getPossibleMoves(_myTaichoBoard, bc);
 	    	}
     	}
-       	
-//    	_myTaichoBoard.getCoordinateOfId(bc.getId());
-//    	_myTaichoBoard.getBoardComponentAtId(bc.getId());
     }  
     
 	private void init() {
@@ -1005,22 +1070,12 @@ public class StateGame extends State {
     }
 	
 	private void resetGame() {
-		// Reset score
-//		_points = 0;
-		
 		// Generate board
-//		_board.generate();
 		_myTaichoBoard = new TaichoGameData();
 		
 		// Set Starting Player
 			//may add ability to change later on....
 		_myTaichoBoard.nextTurn(Player.PLAYER_ONE);		//set starting turn to player one
-		
-		// Redraw the scoreboard
-//		redrawScoreBoard();
-		
-		// Restart the time (two minutes)
-//		_remainingTime = 120; 
 	}
 	
 	private void nextTurn(){
@@ -1072,5 +1127,13 @@ public class StateGame extends State {
 	
 	private boolean playSound(){
 		return this.soundIsOn;
+	}
+	
+	private void showPopupWindow(String windowText, String posButtonText, String negButtonText, AlertWindow.Use myUse){
+		_popupWindow.setText(windowText);
+		_popupWindow.setPosButtonText(posButtonText);
+		_popupWindow.setNegButtonText(negButtonText);
+		_popupWindow.setHidden(false);
+		_popupWindow.setMyCurrentUse(myUse);
 	}
 }
