@@ -243,6 +243,10 @@ public abstract class MovableObject {
 			if( !potentialBc.equals(bc) && !potentialBc.isOccupied() ){
 				potentialBc.setHighlight(true);
 				legalMoves.add(potentialBc);
+			}else if( !potentialBc.equals(bc) && potentialBc.isOccupied() && potentialBc.getCharacterPlayer() != this.getPlayer() && potentialBc.getCharacter().getRank() == Ranks.LEVEL_ONE){
+					//an opposing players character has entered the castle
+				potentialBc.setAttackable(true);
+				legalMoves.add(potentialBc);
 			}
 		}
 		return legalMoves;

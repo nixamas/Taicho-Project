@@ -34,7 +34,7 @@ import com.cosmichorizons.utilities.SaveGameObject;
  */
 public class TaichoGameData {
 	BoardComponent[][] board;
-	private Player player1, player2, currentPlayer;
+	private Player player1, player2, currentPlayer, gameWinner;
 	private boolean gameInPlay = true;
 	private LinkedList<ObjectMove> moves;
 
@@ -46,6 +46,7 @@ public class TaichoGameData {
 		System.out.println("ObjectData constructor");
 		player1 = p1;
 		player2 = p2;
+		gameWinner = Player.NONE;
 		this.moves = new LinkedList<ObjectMove>();
 		board = new BoardComponent[9][15];
 		setUpGame();
@@ -55,6 +56,7 @@ public class TaichoGameData {
 		try{
 			player1 = Player.PLAYER_ONE;
 			player2 = Player.PLAYER_TWO;
+			gameWinner = Player.NONE;
 			this.moves = new LinkedList<ObjectMove>();
 			board = new BoardComponent[9][15];
 			resumeGame(savedGameObject);
@@ -92,6 +94,7 @@ public class TaichoGameData {
 		try{
 			player1 = Player.PLAYER_ONE;
 			player2 = Player.PLAYER_TWO;
+			gameWinner = Player.NONE;
 			this.moves = new LinkedList<ObjectMove>();
 			board = new BoardComponent[9][15];
 			setUpGame();
@@ -464,6 +467,7 @@ public class TaichoGameData {
 	    			}else if(oppressingCharacter.getCombatValue() >= victimCharacter.getCombatValue() && victimCharacter.getRank() == Ranks.TAICHO){
 	    				// A taicho character has been killed, game is over
 	    				System.out.println("Game is over, taicho is dead");
+	    				this.gameWinner = oppressingCharacter.getPlayer();
 	    				this.gameInPlay = false;
     				}else{
 	    				//attacking character can beat victim using teammates
@@ -627,4 +631,8 @@ public class TaichoGameData {
     		return false;
     	}
     }
+
+	public Player getGameWinner() {
+		return gameWinner;
+	}
 }

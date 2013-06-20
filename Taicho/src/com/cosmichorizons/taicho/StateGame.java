@@ -95,7 +95,7 @@ public class StateGame extends State {
 	private Color _imgColor = Color.WHITE.cpy();
 	private Coordinate _coord = new Coordinate();
 	
-	private boolean DEBUG = Boolean.TRUE;	//controls whether debug data is shown
+private boolean DEBUG = Boolean.FALSE;	//controls whether debug data is shown
 	private boolean TURNS = Boolean.TRUE;	//controls whether the game controls players turns
 	
 	
@@ -120,22 +120,6 @@ public class StateGame extends State {
 		_backButton = new Button(_parent, 975, 630, _lang.getString("Back") );
 		_musicButton = new IconButton(_parent, 975, 20, "");
 		_soundButton = new IconButton(_parent, 1020, 20, "");
-		
-		// Create board
-//		_myTaichoBoard = new TaichoGameData();
-		
-//		_systemConfig = new SystemConfiguration();
-//		soundIsOn = _systemConfig.isSoundSet();
-//		musicIsOn = _systemConfig.isMusicSet();
-//		
-//		if( _systemConfig.isGameInProgress() ){
-//			_myTaichoBoard = new TaichoGameData( _systemConfig.parseSaveFile() );
-//		}else{
-//			_myTaichoBoard = new TaichoGameData();
-//		}
-		
-		// TESTING
-//		_systemConfig.writeTaichoGameData( _myTaichoBoard ); 
 		
 		validMoves = new ArrayList<BoardComponent>();
 		
@@ -394,7 +378,9 @@ public class StateGame extends State {
 								if( !_myTaichoBoard.isGameInPlay() ){
 									//GAME IS OVER , GAME OVER , GAMEOVER , GAME_OVER
 //									this.resetGame();
-									_parent.changeState("StateGameOverMenu");
+									String windowText = "Congratulations " + _myTaichoBoard.getGameWinner().getUserReadableString() + ", Start a new game?";
+									showPopupWindow(windowText, "New Game", "Exit", AlertWindow.Use.StartNewGame);
+//									_parent.changeState("StateGameOverMenu");
 									
 								}
 							}else if( _state == State.StackingCharacter){
@@ -804,6 +790,13 @@ public class StateGame extends State {
 		    			}else if( "negative".equalsIgnoreCase(state) ){		// lets start a new game
 		    				_myTaichoBoard = new TaichoGameData();
 		    				_myTaichoBoard.setCurrentPlayer(Player.PLAYER_ONE);		//Set starting player
+		    			}
+		    		}else if( _popupWindow.getMyCurrentUse() == AlertWindow.Use.StartNewGame ){
+		    			if( "positive".equalsIgnoreCase(state) ){
+		    				_myTaichoBoard = new TaichoGameData();
+		    				_myTaichoBoard.setCurrentPlayer(Player.PLAYER_ONE);		//Set starting player
+		    			}else if ( "negative".equalsIgnoreCase(state) ){
+		    				_parent.changeState("StateGameOverMenu");
 		    			}
 		    		}
 		        	_popupWindow.close();

@@ -183,10 +183,10 @@ public class StateGameOverMenu extends State {
 		
 	    batch.draw(_imgBackground, 0, 0);
 	    
-	    if( this._gameWinner != Player.NONE ){
-	    	_fontMenu.setColor(1.0f, 1.0f, 1.0f, 1.0f);
-			_fontMenu.draw(batch, "CONGRATULATIONS " + this._gameWinner.getUserReadableString(), _infoBanner.x, _infoBanner.y );
-	    }
+//	    if( this._gameWinner != Player.NONE ){
+//	    	_fontMenu.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+//			_fontMenu.draw(batch, "CONGRATULATIONS " + this._gameWinner.getUserReadableString(), _infoBanner.x, _infoBanner.y );
+//	    }
 	    
 	    
 	    int numOptions = _options.size;

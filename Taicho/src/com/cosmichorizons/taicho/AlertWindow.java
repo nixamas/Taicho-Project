@@ -22,7 +22,8 @@ public class AlertWindow {
 	public enum Use {	//add a enum for anytime this popup window is used
 		NONE,
 		ResumeSaveGame,
-		SaveCurrentGame
+		SaveCurrentGame,
+		StartNewGame
 	};
 
 //	public AlertWindow(Taicho game,
